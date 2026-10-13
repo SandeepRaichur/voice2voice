@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice2Voice AI Agent | Python Backend</title>
+  <meta name="description"
+    content="Fully functional emotion-aware voice-to-voice conversational AI agent powered by Python, faster-whisper, PyTorch, Ollama, and offline TTS.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header with System Health Indicators -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">VOICE2VOICE AI</h1>
+          <p class="brand-subtitle">Python Backend &bull; faster-whisper &bull; Ollama &bull; Offline TTS</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <!-- Python Server Health -->
+        <div id="serverBadge" class="badge badge-status" title="FastAPI Python Server Status">
+          <span class="status-dot"></span>
+          <span id="serverText">Python: Online</span>
+        </div>
+
+        <!-- AI Brain Health (Gemini / Ollama) -->
+        <div id="aiBadge" class="badge" title="AI Brain Status">
+          <span class="status-dot"></span>
+          <span id="aiText">Gemini: Checking...</span>
+        </div>
+
+        <!-- Emotion Indicator -->
+        <div id="emotionBadge" class="badge badge-emotion">
+          <span class="emotion-icon">🌿</span>
+          <span id="emotionText">Composed / Neutral</span>
+        </div>
+
+        <!-- Real-Time Latency Telemetry Badge -->
+        <div id="latencyBadge" class="badge" title="End-to-End Voice Turn Latency" style="font-family: monospace; font-size: 0.8rem;">
+          <span class="status-dot" style="background-color: #06b6d4;"></span>
+          <span id="latencyText">Real-Time: Ready</span>
+        </div>
+
+        <button id="btnOpenSettings" class="icon-btn" title="Open Settings" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Visual Stage -->
+    <main class="main-stage">
+      <div class="visualizer-container">
+        <canvas id="voiceVisualizerCanvas"></canvas>
+
+        <div id="liveSpeechOverlay" class="live-speech-overlay" aria-live="polite">
+          <span id="liveSpeechText">Click the microphone to start speaking...</span>
+        </div>
+      </div>
+
+      <!-- Live Emotional Telemetry HUD -->
+      <section class="telemetry-grid">
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <span class="telemetry-label">VOCAL ENERGY</span>
+            <span id="telemetryDb" class="telemetry-value">-60 dB</span>
+          </div>
+          <div class="meter-bar-container">
+            <div id="meterBarEnergy" class="meter-bar" style="width: 10%;"></div>
+          </div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <span class="telemetry-label">PITCH / INFLECTION</span>
+            <span id="telemetryPitch" class="telemetry-value">-- Hz</span>
+          </div>
+          <div class="meter-bar-container">
+            <div id="meterBarPitch" class="meter-bar meter-bar-pitch" style="width: 20%;"></div>
+          </div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <span class="telemetry-label">VOICE EMOTION (CPU MODEL)</span>
+            <span id="telemetryConfidence" class="telemetry-value">-- %</span>
+          </div>
+          <p id="telemetryEmotionSummary" class="telemetry-subtext">Acoustic neutrality</p>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-header">
+            <span class="telemetry-label">ADAPTED TONE</span>
+            <span id="telemetryToneBadge" class="tone-pill">Thoughtful & Composed</span>
+          </div>
+          <p id="telemetryToneRule" class="telemetry-subtext">Section 2: Emotionally aligned response</p>
+        </div>
+      </section>
+
+      <!-- Primary Interaction Bar -->
+      <section class="control-bar">
+        <div class="control-side">
+          <label class="toggle-control"
+            title="Hands-free continuous conversation with automatic Voice Activity Detection">
+            <input type="checkbox" id="toggleHandsFree" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Hands-Free (VAD)</span>
+          </label>
+        </div>
+
+        <div class="control-center">
+          <button id="btnMainMic" class="mic-button" title="Start / Stop Speaking" aria-label="Microphone">
+            <div class="mic-pulse-ring"></div>
+            <svg id="micIcon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="control-side end">
+          <button id="btnInterrupt" class="action-btn btn-interrupt" title="Interrupt Ongoing Voice Playback" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            <span>Interrupt</span>
+          </button>
+          <button id="btnToggleDrawer" class="action-btn" title="Toggle Conversation Transcript">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Transcript</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Spoken Response Display Card -->
+      <section class="assistant-response-card" id="assistantResponseCard">
+        <div class="card-tag">ASSISTANT SPOKEN REPLY</div>
+        <p id="assistantSpokenText" class="spoken-text">"Hello! I'm here and ready to talk. How can I help you today?"
+        </p>
+      </section>
+    </main>
+
+    <!-- Slide-out Conversation Transcript Drawer -->
+    <aside id="transcriptDrawer" class="transcript-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <h2>Conversation Memory</h2>
+        </div>
+        <div class="drawer-actions">
+          <button id="btnClearHistory" class="text-btn" title="Clear History">Clear</button>
+          <button id="btnCloseDrawer" class="icon-btn-sm" title="Close Drawer">✕</button>
+        </div>
+      </div>
+      <div id="transcriptList" class="transcript-list">
+        <div class="empty-state">
+          <p>No conversation yet. Speak into the microphone to begin.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Hidden Audio Player for Offline Python TTS Playback -->
+  <audio id="ttsAudioPlayer" preload="auto"></audio>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Assistant & Engine Settings</h2>
+        <button id="btnCloseSettings" class="icon-btn-sm">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="selectAiProvider">AI Brain Provider</label>
+          <select id="selectAiProvider" class="form-control">
+            <option value="gemini" selected>Google Gemini (Free Tier via Google AI Studio)</option>
+            <option value="ollama">Local Ollama (qwen2.5:3b - 100% Offline)</option>
+          </select>
+        </div>
+
+        <div id="groupGeminiKey" class="form-group">
+          <label for="inputGeminiApiKey">Google Gemini Free API Key</label>
+          <input type="password" id="inputGeminiApiKey" class="form-control" placeholder="Paste AIzaSy... key here">
+          <p class="form-help">
+            Get a 100% free API key (15 requests/min) from <a href="https://aistudio.google.com/app/apikey"
+              target="_blank" rel="noopener">Google AI Studio</a>. Saved locally in your server's .env.
+          </p>
+        </div>
+
+        <div id="groupGeminiModel" class="form-group">
+          <label for="selectGeminiModel">Gemini Model</label>
+          <select id="selectGeminiModel" class="form-control">
+            <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Latest & Recommended)</option>
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Fast Lightweight)</option>
+          </select>
+
+        </div>
+
+        <div class="form-group">
+          <label for="selectTtsEngine">Text-to-Speech Engine</label>
+          <select id="selectTtsEngine" class="form-control">
+            <option value="edge-tts" selected>edge-tts (Real-Time Neural Streaming - Ultra Low Latency)</option>
+            <option value="pyttsx3">pyttsx3 (100% Offline Windows SAPI5)</option>
+          </select>
+        </div>
+
+        <div id="groupEdgeVoice" class="form-group">
+          <label for="selectEdgeVoice">Speech Voice (Indian English)</label>
+          <select id="selectEdgeVoice" class="form-control">
+            <option value="en-IN-NeerjaNeural" selected>Neerja (Indian English Female - Natural Neural)</option>
+            <option value="en-IN-PrabhatNeural">Prabhat (Indian English Male - Natural Neural)</option>
+            <option value="en-US-JennyNeural">Jenny (US English Female - Fast)</option>
+            <option value="en-GB-SoniaNeural">Sonia (British English Female)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="selectVadSilence">Conversational Turn Detection (VAD Silence)</label>
+          <select id="selectVadSilence" class="form-control">
+            <option value="400">400 ms (Fastest Interactivity)</option>
+            <option value="500" selected>500 ms (Recommended Balanced)</option>
+            <option value="750">750 ms (Pensive Pacing)</option>
+            <option value="1200">1200 ms (Long Pauses)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="selectEmotionToggle">Voice Emotion Classification</label>
+          <select id="selectEmotionToggle" class="form-control">
+            <option value="false" selected>Disabled (Ultra-Low Latency Mode - Recommended)</option>
+            <option value="true">Enabled (Background Acoustic Analysis)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Engine Connection Diagnostics</label>
+          <div id="settingsAiDiag" class="form-control" style="font-size: 0.82rem; color: #94a3b8; min-height: 40px;">
+            Checking...</div>
+        </div>
+
+        <div class="form-group">
+          <label>Speech-to-Text Engine</label>
+          <div class="form-control" style="font-size: 0.85rem; color: #94a3b8;">faster-whisper (base.en, Greedy INT8 on CPU)</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnSaveSettings" class="primary-btn">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio-processor.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
